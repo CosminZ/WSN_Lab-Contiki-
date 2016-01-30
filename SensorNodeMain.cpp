@@ -368,7 +368,7 @@ int main (int argc, char** argv)
   		strftime (time_buf, 12, "%I:%M:%S%p", loctime);
 
 	//Prepare message buffer to send
-		sprintf(sendbuffer, "%s | %s | %.4fV | %d% | %d% | %s | %s | %s | %.4f |", 
+		sprintf(sendbuffer, "%s|%s|%.4fV|%d%|%d%|%s|%s|%s|%.4f|", 
 			time_buf, ID_Test, BAT_Vol, BAT_SoC, BAT_A_T, BAT_ALERT, ENV_H, IMU_xyz, temp);
 		 //fputs (sendbuffer, stdout);
 	//now send a datagram 
