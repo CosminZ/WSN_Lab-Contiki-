@@ -1,7 +1,7 @@
 /*
 * Author: Manisha
 * 
-* Display figure and msg using udp_ipv6
+* file:-Display figure locally and msg using udp_ipv6
 *
 */
 
