@@ -340,7 +340,11 @@ int main (int argc, char** argv)
 				strcpy(IMU_xyz, "NVIB");
 				moveDetected = false;
 			}
-			    
+			 
+			//Temperature	
+			if(temp > 37){
+				break;
+			}
 			usleep(100000);	//wait for 100ms
 		}while((humidity < 40)||(moveDetected == false));
 
@@ -349,28 +353,57 @@ int main (int argc, char** argv)
 		//BAT_SoC = m_batgauge->getSoC();
 		//BAT_A_T = m_batgauge->getAlertThreshold();		
 		if (m_batgauge->getAlertStatus()){
-			strcpy(BAT_ALERT, "BAT_ALRT");
+			//strcpy(BAT_ALERT, "BAT_ALRT");
+			strcpy(sendbuffer, "D");			
+			printf("Battery Alert\n");
+			//now send a datagram 
+			if (sendto(sock, sendbuffer, sizeof(sendbuffer), 0,(struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+				perror("sendto failed");
+				exit(4);
+			}	
 		}else{
 			strcpy(BAT_ALERT, "N_BAT_ALRT");
 		}
 			
 	//Humidity Sensor
 		if (humidity > 40){
-			strcpy(ENV_H, "BLOW");
+			//strcpy(ENV_H, "BLOW");
+			strcpy(sendbuffer, "B");			
+			printf("Blow\n");
+			//now send a datagram 
+			if (sendto(sock, sendbuffer, sizeof(sendbuffer), 0,(struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+				perror("sendto failed");
+				exit(4);
+			}	
 		}else{
 			strcpy(ENV_H, "NBLOW");
 		}
 		
 	//Accelerometer		
 		if(moveDetected == true){
-			//strcpy(IMU_xyz, "VIB");
+			strcpy(sendbuffer, "A");			
+			printf("Vibration\n");
+			
+			//now send a datagram 
+			if (sendto(sock, sendbuffer, sizeof(sendbuffer), 0,(struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+				perror("sendto failed");
+				exit(4);
+			}	
 		}else{		
-			//strcpy(IMU_xyz, "NVIB");
+			strcpy(IMU_xyz, "NVIB");
 		}
 		
 	//Temperature	
-		if(temp > 32.5){
-			strcpy(ENV_T, "HOT");
+		if(temp > 37){
+			//strcpy(ENV_T, "HOT");
+			strcpy(sendbuffer, "C");			
+			printf("Hot\n");
+			
+			//now send a datagram 
+			if (sendto(sock, sendbuffer, sizeof(sendbuffer), 0,(struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+				perror("sendto failed");
+				exit(4);
+			}	
 		}else{		
 			strcpy(ENV_T, "COLD");
 		}
@@ -386,20 +419,17 @@ int main (int argc, char** argv)
 		sprintf(sendbuffer, "%s | %s | %.4fV | %d% | %d% | %s | %s | %s | %.4f |", 
 			time_buf, ID_Test, BAT_Vol, BAT_SoC, BAT_A_T, BAT_ALERT, ENV_H, IMU_xyz, temp);
 */
-		sprintf(sendbuffer, "%s | %s | %s | %s |", BAT_ALERT, ENV_H, ENV_T, IMU_xyz);
-		 fputs (sendbuffer, stdout);
-		printf("\n");
-		//usleep(2000000);
+		//sprintf(sendbuffer, "%s | %s | %s | %s |", BAT_ALERT, ENV_H, ENV_T, IMU_xyz);
+		// fputs (sendbuffer, stdout);
 	
 	//now send a datagram 
-		printf("sending packets\n");
-		if (sendto(sock, sendbuffer, sizeof(sendbuffer), 0,
+/*		if (sendto(sock, sendbuffer, sizeof(sendbuffer), 0,
 			 (struct sockaddr *)&server_addr,
 				sizeof(server_addr)) < 0) {
 			perror("sendto failed");
 			exit(4);
 		}		
-		printf("packets sent\n");
+*/
 
 		do{
 			//Environmental sensor--- Get humidity reading
@@ -409,8 +439,13 @@ int main (int argc, char** argv)
 				usleep(1000000);
 				break;
 			}
+			else if (temp > 33){
+				usleep(1000000);
+				break;
+			}
+				
 			usleep(2000000);
-		}while(humidity > 45);
+		}while(humidity > 50);
 	}		 
  
 }
