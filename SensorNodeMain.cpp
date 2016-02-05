@@ -65,7 +65,7 @@ int m_imuID = 0x71;
 int m_batID = 3;
 
 //*************** Accelerometer declarations***************
-int tolerance = 2; 		// Sensitivity of the sensor
+int tolerance = 3; 			// Sensitivity of the sensor
 bool calibrated = false; 	// When accelerometer is calibrated - changes to true 
 bool moveDetected = false; 	// When motion is detected - changes to true
 	
@@ -278,11 +278,12 @@ int main (int argc, char** argv)
 	char sendbuffer[1024];
 	char ID_Test[10] = {0};
 	char ENV_H[10] = {0};	
+	char ENV_T[10] = {0};
 	char IMU_xyz[10] = {0};
 	char BAT_ALERT[12] = {0};
-	float BAT_Vol;
-	int BAT_SoC;
-	int BAT_A_T;
+	//float BAT_Vol;
+	//int BAT_SoC;
+	//int BAT_A_T;
 			
 	memset(sendbuffer,0,1024);
 
@@ -320,24 +321,33 @@ int main (int argc, char** argv)
 		do{	
 			//Program termination request
 			signal(SIGINT,INT_HANDLER);	
-				
-			// Once the accelerometer is calibrated - check for movement 
-			if(calibrated){
-				if(checkMotion()){
-					moveDetected = true;
-					break;
-				} 
-			}
+			
 			//Environmental sensor--- Get humidity reading
 			m_imu->getEnvData(temp, pressure, humidity);
+			
+			//Humidity Sensor
+			if (humidity > 40){
+				break;
+			}
+			
+			// Once the accelerometer is calibrated - check for movement 
+			if(checkMotion()){
+				moveDetected = true;
+				strcpy(IMU_xyz, "VIB");
+				break;
+			} 
+			else{
+				strcpy(IMU_xyz, "NVIB");
+				moveDetected = false;
+			}
 			    
 			usleep(100000);	//wait for 100ms
-		}while((humidity < 40) || (moveDetected == false));
+		}while((humidity < 40)||(moveDetected == false));
 
 	//Battery Gauge		
-		BAT_Vol = m_batgauge->getVCell();
-		BAT_SoC = m_batgauge->getSoC();
-		BAT_A_T = m_batgauge->getAlertThreshold();		
+		//BAT_Vol = m_batgauge->getVCell();
+		//BAT_SoC = m_batgauge->getSoC();
+		//BAT_A_T = m_batgauge->getAlertThreshold();		
 		if (m_batgauge->getAlertStatus()){
 			strcpy(BAT_ALERT, "BAT_ALRT");
 		}else{
@@ -346,33 +356,43 @@ int main (int argc, char** argv)
 			
 	//Humidity Sensor
 		if (humidity > 40){
-			printf("sensor Blown\n");
 			strcpy(ENV_H, "BLOW");
 		}else{
-			strcpy(ENV_H, "N_BLOW");
+			strcpy(ENV_H, "NBLOW");
 		}
 		
 	//Accelerometer		
 		if(moveDetected == true){
-			printf("Acceleration\n");
-			strcpy(IMU_xyz, "ACC");
+			//strcpy(IMU_xyz, "VIB");
 		}else{		
-			strcpy(IMU_xyz, "N_ACC");
+			//strcpy(IMU_xyz, "NVIB");
+		}
+		
+	//Temperature	
+		if(temp > 32.5){
+			strcpy(ENV_T, "HOT");
+		}else{		
+			strcpy(ENV_T, "COLD");
 		}
 
-		/* Get the current time. */
-  		curtime = time (NULL);
+		// Get the current time. 
+/*  		curtime = time (NULL);
 
-  		/* Convert it to local time representation. */
+  		// Convert it to local time representation. 
   		loctime = localtime (&curtime);
   		strftime (time_buf, 12, "%I:%M:%S%p", loctime);
 
 	//Prepare message buffer to send
-		sprintf(sendbuffer, "%s|%s|%.4fV|%d%|%d%|%s|%s|%s|%.4f|", 
+		sprintf(sendbuffer, "%s | %s | %.4fV | %d% | %d% | %s | %s | %s | %.4f |", 
 			time_buf, ID_Test, BAT_Vol, BAT_SoC, BAT_A_T, BAT_ALERT, ENV_H, IMU_xyz, temp);
-		 //fputs (sendbuffer, stdout);
+*/
+		sprintf(sendbuffer, "%s | %s | %s | %s |", BAT_ALERT, ENV_H, ENV_T, IMU_xyz);
+		 fputs (sendbuffer, stdout);
+		printf("\n");
+		//usleep(2000000);
+	
 	//now send a datagram 
-		printf("sending packets\n");
+/*		printf("sending packets\n");
 		if (sendto(sock, sendbuffer, sizeof(sendbuffer), 0,
 			 (struct sockaddr *)&server_addr,
 				sizeof(server_addr)) < 0) {
@@ -380,11 +400,16 @@ int main (int argc, char** argv)
 			exit(4);
 		}		
 		printf("packets sent\n");
-
+*/
 		do{
 			//Environmental sensor--- Get humidity reading
-			m_imu->getEnvData(temp, pressure, humidity);
-			usleep(2000000);
+			m_imu->getEnvData(temp, pressure, humidity);			
+			
+			if(checkMotion()){
+				usleep(1000000);
+				break;
+			}
+			usleep(1000000);
 		}while(humidity > 45);
 	}		 
  
