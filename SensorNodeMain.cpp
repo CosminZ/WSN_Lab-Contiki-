@@ -392,7 +392,7 @@ int main (int argc, char** argv)
 		//usleep(2000000);
 	
 	//now send a datagram 
-/*		printf("sending packets\n");
+		printf("sending packets\n");
 		if (sendto(sock, sendbuffer, sizeof(sendbuffer), 0,
 			 (struct sockaddr *)&server_addr,
 				sizeof(server_addr)) < 0) {
@@ -400,7 +400,7 @@ int main (int argc, char** argv)
 			exit(4);
 		}		
 		printf("packets sent\n");
-*/
+
 		do{
 			//Environmental sensor--- Get humidity reading
 			m_imu->getEnvData(temp, pressure, humidity);			
@@ -409,7 +409,7 @@ int main (int argc, char** argv)
 				usleep(1000000);
 				break;
 			}
-			usleep(1000000);
+			usleep(2000000);
 		}while(humidity > 45);
 	}		 
  
