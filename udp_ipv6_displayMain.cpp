@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
 
 	HAL_LCD_initDisplay();
 	//tContext g_sContext;
-	Graphics_initContext(&g_sContext, &g_sharp96x96LCD);
+	Graphics_initContext(&g_sContext, &g_sharp128x128LCD);
 	Graphics_setForegroundColor(&g_sContext, ClrWhite);
 	Graphics_setBackgroundColor(&g_sContext, ClrBlack);
 	Graphics_setFont(&g_sContext, &g_sFontFixed6x8);
