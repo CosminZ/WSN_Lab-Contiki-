@@ -1,11 +1,7 @@
 /*
   Creation of an ArrayList and its functions.
-  It will store the list of IP adresses of the nodes
+  It will store the list of IP addresses of the nodes
 
-  
-  WSN Laboratory
-  Uni Freiburg
-  Freiburg, 25.01.2015
 */
 
 
@@ -21,106 +17,87 @@
 #include "udpClient6.h"
 #include "localizationList.h"
 
-/*
-typedef char* value_type;
 
-struct arraylist {
-  int size;
-  value_type* data;
-};*/
-
-void arraylist_initial(struct arraylist *list) {
-  list->size = 0;
-  list->data = NULL;
+void list_init(struct arraylist *list) {
+  list -> size = 0;
+  list -> data = NULL;
 }
 
-int arraylist_get_size(const struct arraylist list) {
+void list_setData(struct arraylist *list, data_type* data) {
+  list-> data = data;
+}
+
+int list_get_size(const struct arraylist list) {
   return list.size;
 }
 
-value_type* arraylist_get_data_collection(const struct arraylist list) {
-  return list.data;
-}
-
-void arraylist_set_data_collection(struct arraylist *list, value_type* data) {
-  list->data = data;
-}
-
-void arraylist_add(struct arraylist *list, value_type value) {
- int size = arraylist_get_size(*list);
-  value_type *new_data;
-
-  new_data = realloc(list->data, (size + 1) * sizeof new_data[0]);
-
-  if (new_data)
+void list_add(struct arraylist *list, data_type data) {
+ int size = list_get_size(*list);
+  data_type *newData;
+  newData = realloc(list -> data, (size + 1) * sizeof newData[0]);
+  if (newData)
   {
-      new_data[size] = value;
-      arraylist_set_data_collection(list, new_data);
-      ++list->size;
+      newData[size] = data;
+      list_setData(list, newData);
+      ++list -> size;
   }
 }
 
-value_type arraylist_get(const struct arraylist list, int index) {
-  if(index < arraylist_get_size(list)) {
-    return list.data[index];
+data_type list_get(const struct arraylist list, int index) {
+  if(index < list_get_size(list) && index >= 0) {
+		return list.data[index];
   }
   else {
-    return NULL;
+		return NULL;
   }
 }
 
-int arraylist_indexof(const struct arraylist list, value_type value) {
+int list_indexof(const struct arraylist list, data_type data) {
   int index = 0;
-  for(index = 0; index < (arraylist_get_size(list)); index++) {
-    if(strcmp(list.data[index], value) == 0) {
-      return index;
+  for(index = 0; index < (list_get_size(list)); index++) {
+    if(strcmp(list.data[index], data) == 0) {
+		return index;
     }
   }
-
   return -1;
 }
 
-
-void addToListWithCheck (struct arraylist *list, value_type value) {
-  printf("Inside addToListWithCheck ipaddr = %s", value);
-  int index = arraylist_indexof(*list, value);
-  printf("Index of Ip adress (%s) in current arrayList = %d",value, index);
+// Adds string address to list if not present already
+void addToListWithCheck (struct arraylist *list, data_type value) {
+  int index = list_indexof(*list, value);
   if (index != -1) {
     printf("String not added [already present], index of string in arrayList = %d. \n", index);
   } else {
-    arraylist_add (list, value);
+    list_add (list, value);
   }
 }
 
-char* getLeftOf (struct arraylist list, value_type value) {
-  printf("------ Inside getLeftOf incomingIp = %s.\n ", value);
+// Gives IP address of left (index - 1) neighbour (wrap around for index = 0) 
+char* getLeftOf (struct arraylist list, data_type value) {
   char * leftIp = NULL;
-  int index = arraylist_indexof(list, value);
-  printf("------ Inside getLeftOf index of incomingIp in list = %d.\n ", index);
+  int index = list_indexof(list, value);
   if (index != -1) {
     if (index == 0) {
-      leftIp = arraylist_get(list, (arraylist_get_size (list) - 1));
+      leftIp = list_get(list, (list_get_size (list) - 1));
     }
     else if (index > 0) {
-      leftIp = arraylist_get(list, (index-1));
+      leftIp = list_get(list, (index-1));
     }
   }
   return leftIp;
 }
 
-char* getRightOf (struct arraylist list, value_type value) {
-  printf("------ Inside getLeftOf incomingIp = %s.\n ", value);
+// Gives IP address of right neighbour (index + 1) (wrap around for last IP in the list) 
+char* getRightOf (struct arraylist list, data_type value) {
   char * rightIp = NULL;
-  int index = arraylist_indexof(list, value);
-  printf("------ Inside getRightOf index of incomingIp in list = %d.\n ", index);
-  int size = arraylist_get_size (list);
-  printf("------ Inside getRightOf size of list = %d.\n ", size);
+  int index = list_indexof(list, value);
+  int size = list_get_size(list);
   if (index != -1) {
     if (index == (size - 1)) {
-      rightIp = arraylist_get(list, 0);
+      rightIp = list_get(list, 0);
     }
     else if (index >= 0) {
-      rightIp = arraylist_get(list, (index+1));
+      rightIp = list_get(list, (index+1));
     }
   }
   return rightIp;
