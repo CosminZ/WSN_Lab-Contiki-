@@ -19,7 +19,7 @@ ip addr add fe80:: dev wlan0
 
 7. The localization process is based on accelerometer events. To generate one alarm of this type, one needs to move the node. This process should be executed first, to set an order between the sensor nodes. The node which is moved first, will be located in the first position of the list, and so on. Once all the sensors are in the list (it depends of the total number of sensors, which is defined in the central node firmware), the localization process finishes and we can proceed with the normal functions of the network. The figure will be displayed in the leftmost sensor.
 
-8. If the temperature increases above a pre-defined threshold and the figure is also present in that specific sensor node, the figure will move to the furthest node.
+8. If the temperature increases above a pre-defined threshold, the figure will move to the furthest node from the one that sent the temperature warning.
 
 9. If the node is moved and the figure is present there, it will fall down.
 
